@@ -81,7 +81,7 @@ def concat_images(imga, imgb):
 
 
 # Edit this function to create your own pipeline.
-def process_image(img, sx_thresh=(10, 250)):
+def binarize_image(img, sx_thresh=(10, 250)):
     img  = np.copy(img)
     img = gaussian_blur(img, 5)
     color_select = select_hls_white_yellow(img)
@@ -111,36 +111,33 @@ def process_image(img, sx_thresh=(10, 250)):
 
     return combined_binary
 
-img_path1 = 'output_images/test_images_undistored/*jpg'
-img_path2 = 'output_images/test_images_undistored/*png'
-img_files = glob.glob(img_path1)
+img_path = 'output_images/test_images_undistored/'
+img_path2 = 'output_images/test_images_undistored/out/'
+img_files = glob.glob(img_path + '*.jpg') +  glob.glob(img_path + '*.png')
 
+
+def perspective_transform(image):
+    src = np.float32([[(200, 720), (570, 470), (720, 470), (1130, 720)]])
+    dst = np.float32([[(350, 720), (350, 0), (980, 0), (980, 720)]])
+    M     = cv2.getPerspectiveTransform(src, dst)
+    M_inv = cv2.getPerspectiveTransform(dst, src)
+    img_size = image.shape[:2][::-1]
+    return cv2.warpPerspective(image, M, img_size , flags=cv2.INTER_LINEAR)
 
 for img_file in img_files:
     # Load color images into BGR format 
     image = cv2.imread(img_file)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    thresholded = process_image(image)
+    binary_image = binarize_image(image)
+    warped_image = perspective_transform(binary_image)
+    image_name = img_file.split('/')[-1].split('.')[0]
+    image_name = image_name + '_warpped.jpg'
+    image_name = img_path2 + image_name
+    warped_image = warped_image*255
+    warped_image[warped_image > 255] = 255
+    cv2.imwrite(image_name, warped_image)
 
-    bottom_left = [320,720] 
-    bottom_right = [920, 720]
-    top_left = [320, 1]
-    top_right = [920, 1]
-
-    dst   = np.float32([bottom_left,bottom_right,top_right,top_left])
-
-    src = np.float32([[(200, 720), (570, 470), (720, 470), (1130, 720)]])
-    dst = np.float32([[(350, 720), (350, 0), (980, 0), (980, 720)]])
-
-    M     = cv2.getPerspectiveTransform(src, dst)
-    M_inv = cv2.getPerspectiveTransform(dst, src)
-
-    img_size = image.shape[:2][::-1]
-
-    warped = cv2.warpPerspective(thresholded, M, img_size , flags=cv2.INTER_LINEAR)
-
-
-    # Plot the result
+    #Plot the result
     f, (ax1, ax2) = plt.subplots(1, 2, figsize=(24, 9))
     f.tight_layout()
 
@@ -148,10 +145,11 @@ for img_file in img_files:
     name = img_file.split('/')[-1]
     ax1.set_title(name, fontsize=40)
     
-    ax2.imshow(warped, cmap='gray')
+    ax2.imshow(warped_image, cmap='gray')
     ax2.set_title('warped', fontsize=40)
     plt.subplots_adjust(left=0., right=1, top=0.9, bottom=0.)
-    plt.show()
+    # plt.show()
+
 
 if 0:
     from moviepy.editor import VideoFileClip

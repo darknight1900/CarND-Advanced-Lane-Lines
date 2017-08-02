@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 
 
-binary_warped = mpimg.imread('warped-example.jpg')
+binary_warped = mpimg.imread('test1_warpped.jpg')
 
 # Assuming you have created a warped binary image called "binary_warped"
 # Take a histogram of the bottom half of the image
@@ -24,6 +24,7 @@ nwindows      = 9
 window_height = np.int(binary_warped.shape[0]/nwindows)
 # Identify the x and y positions of all nonzero pixels in the image
 nonzero  = binary_warped.nonzero()
+
 nonzeroy = np.array(nonzero[0])
 nonzerox = np.array(nonzero[1])
 
@@ -70,8 +71,8 @@ for window in range(nwindows):
         rightx_current = np.int(np.mean(nonzerox[good_right_inds]))
 
 # Concatenate the arrays of indices
-left_lane_inds  = np.concatenate(left_lane_inds)
-right_lane_inds = np.concatenate(right_lane_inds)
+left_lane_inds  = np.array(left_lane_inds)
+right_lane_inds = np.array(right_lane_inds)
 
 # Extract left and right line pixel positions
 leftx  = nonzerox[left_lane_inds]
