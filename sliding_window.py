@@ -71,8 +71,8 @@ for window in range(nwindows):
         rightx_current = np.int(np.mean(nonzerox[good_right_inds]))
 
 # Concatenate the arrays of indices
-left_lane_inds  = np.array(left_lane_inds)
-right_lane_inds = np.array(right_lane_inds)
+left_lane_inds  = np.concatenate(left_lane_inds)
+right_lane_inds = np.concatenate(right_lane_inds)
 
 # Extract left and right line pixel positions
 leftx  = nonzerox[left_lane_inds]
