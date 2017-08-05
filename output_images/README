@@ -1,2 +1,3 @@
 chessboard_calib_output: contains the results to undistort and unwarp chessboard images from 'camera_cal'. I concat original image, undistorted image and warpped imag into one image file. 
-test_images_undistored: contains undistort results for images from 'test_images' folder. 
+undistored: contains undistort results for images from 'test_images' folder. 
+pipeline_out: contains the binary image, warpped image and final output of my pipeline. 

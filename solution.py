@@ -258,7 +258,7 @@ class LaneDetector(object):
             image_name = name_hint
             if image_name is None:
                 image_name =  "frame_%d.jpg" % self.processed_count
-            cv2.imwrite(self.dbg_out_path + 'orginal_'   + image_name, frame) 
+            # cv2.imwrite(self.dbg_out_path + 'orginal_'   + image_name, frame) 
             cv2.imwrite(self.dbg_out_path + 'binary_'    + image_name, binary_image*255) 
             cv2.imwrite(self.dbg_out_path + 'warped_'    + image_name, warped_image*255) 
             cv2.imwrite(self.dbg_out_path + 'processed_' + image_name, out_frame)
@@ -292,11 +292,12 @@ class LaneDetector(object):
 ld = LaneDetector('project_video.mp4', 'out_video/', dbg_out_path=None)
 ld.process_video()
 
-# # Process a image file 
-# img_path  = 'output_images/test_images_undistored/'
-# img_files = glob.glob(img_path + '*jpg') +  glob.glob(img_path + '*.png')
-# ld = LaneDetector(img_files[0], 'tmp/', dbg_out_path=None)
-# ld.process_image()
+# # Process all the example image file 
+img_path  = 'output_images/undistorted/'
+img_files = glob.glob(img_path + '*jpg') +  glob.glob(img_path + '*.png')
+for img_file in img_files:
+    ld = LaneDetector(img_file, 'output_images/pipeline_out/', dbg_out_path='output_images/pipeline_out/')
+    ld.process_image()
 
 
 
