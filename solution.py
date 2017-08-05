@@ -187,8 +187,7 @@ class LaneDetector(object):
         ploty      = np.linspace(0, self.img_height-1, self.img_height)
         left_fitx  = left_fit[0]*ploty**2  + left_fit[1]*ploty  + left_fit[2]
         right_fitx = right_fit[0]*ploty**2 + right_fit[1]*ploty + right_fit[2]
-
-        y_eval     = np.median(ploty)
+        y_eval     = np.max(ploty)
         
         leftx      = left_fitx[::-1]  # Reverse to match top-to-bottom in y
         rightx     = right_fitx[::-1] # Reverse to match top-to-bottom in y
@@ -229,12 +228,24 @@ class LaneDetector(object):
         result = cv2.addWeighted(image, 1, newwarp, 0.3, 0)
         return result
 
+    def undistort_img(self, img):
+        # load the camera calib results to undistort image first 
+        dist_pickle = pickle.load(open( "wide_dist_pickle.p", "rb" ) )
+        mtx = dist_pickle["mtx"]
+        dist = dist_pickle["dist"]
+        undist = cv2.undistort(img, mtx, dist, None, mtx)
+        return undist
+
     def _process_image(self, frame, is_video, name_hint = None):
         self.img_width  = frame.shape[1]
         self.img_height = frame.shape[0]
+        ym_per_pix = 30/720 # meters per pixel in y dimension
+        xm_per_pix = 3.7/700 # meteres per pixel in x dimension
 
-        self.ym_per_pix = 30.0/frame.shape[0]
-        self.xm_per_pix = 3.7/frame.shape[1]
+        self.ym_per_pix = 30.0/720
+        self.xm_per_pix = 3.7/650
+        # Apply camera undistortion operation first 
+        frame = self.undistort_img(frame)
 
         # convert the image to binary, only keep the most interesting part
         binary_image = self._binarize_image(frame)
@@ -265,6 +276,7 @@ class LaneDetector(object):
             print(image_name, self.left_line.get_curvance(), 'm', self.right_line.get_curvance(), 'm', self.right_line.get_line_base_pos(), 'm')
         self.processed_count +=1
         return out_frame
+
     def process_image(self):
         print('processing ' + str(self.in_file))
         image = cv2.imread(self.in_file)
@@ -289,11 +301,11 @@ class LaneDetector(object):
             out_video.write(out_frame)
 
 # Process a video file 
-ld = LaneDetector('project_video.mp4', 'out_video/', dbg_out_path=None)
-ld.process_video()
+# ld = LaneDetector('project_video.mp4', 'out_video/', dbg_out_path=None)
+# ld.process_video()
 
 # # Process all the example image file 
-img_path  = 'output_images/undistorted/'
+img_path  = 'test_images/'
 img_files = glob.glob(img_path + '*jpg') +  glob.glob(img_path + '*.png')
 for img_file in img_files:
     ld = LaneDetector(img_file, 'output_images/pipeline_out/', dbg_out_path='output_images/pipeline_out/')

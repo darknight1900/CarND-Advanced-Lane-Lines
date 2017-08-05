@@ -82,11 +82,6 @@ for img_file in sorted(calib_img_files):
         images.append(image)
         img_points.append(corners)
         obj_points.append(objp)
-        # draw and display corners
-#         image_copy = np.copy(image)
-#         cv2.drawChessboardCorners(image_copy, (nx,ny), corners, ret)
-        # plt.imshow(image)
-        # plt.show()
     else:
         print('Unable to find board corners for image ' + name)
         failed_images.append(image)
@@ -197,6 +192,11 @@ def cal_undistort_warp(images, out_images_path, objpoints, imgpoints):
         img = images[idx]
         img_size = img.shape[:2][::-1]
         ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, img_size,None,None)
+        # Save the camera calibration result mtx and dist for future use 
+        dist_pickle = {}
+        dist_pickle["mtx"] = mtx
+        dist_pickle["dist"] = dist
+        pickle.dump(dist_pickle, open("wide_dist_pickle.p", "wb" ) )
         
         undist = cv2.undistort(img, mtx, dist, None, mtx)
         undists.append(undist)
@@ -292,6 +292,19 @@ plt.show()
 
 ![png](output_24_0.png)
 
+
+In my pipeline, I will apply below `undistort_img()` function to undistort the image first. 
+
+
+```python
+def undistort_img(self, img):
+    # load the camera calib results to undistort image first 
+    dist_pickle = pickle.load(open( "wide_dist_pickle.p", "rb" ) )
+    mtx = dist_pickle["mtx"]
+    dist = dist_pickle["dist"]
+    undist = cv2.undistort(img, mtx, dist, None, mtx)
+    return undist
+```
 
 ### 2. Describe how (and identify where in your code) you used color transforms, gradients or other methods to create a thresholded binary image. Provide an example of a binary image result.
 
@@ -392,7 +405,7 @@ plt.show()
 ```
 
 
-![png](output_29_0.png)
+![png](output_31_0.png)
 
 
 ### 3. Describe how (and identify where in your code) you performed a perspective transform and provide an example of a transformed image
@@ -437,7 +450,7 @@ plt.show()
 ```
 
 
-![png](output_33_0.png)
+![png](output_35_0.png)
 
 
 #### 4. Describe how (and identify where in your code) you identified lane-line pixels and fit their positions with a polynomial?
@@ -599,7 +612,7 @@ plt.show()
 ```
 
 
-![png](output_40_0.png)
+![png](output_42_0.png)
 
 
 #### 5. Describe how (and identify where in your code) you calculated the radius of curvature of the lane and the position of the vehicle with respect to center.
@@ -653,7 +666,7 @@ plt.show()
 ```
 
 
-![png](output_44_0.png)
+![png](output_46_0.png)
 
 
 ### Pipeline (video)
